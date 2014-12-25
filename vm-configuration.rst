@@ -107,8 +107,10 @@ disable grub wait time
 static ip addr
 ----------------
 
-有一些实验需要静态IP的支持. 修改虚拟机的 ``/etc/network/interfaces`` 中的 eth0
-项::
+有一些实验需要静态IP的支持. 有多种方法来修改虚拟机的IP.
+指定静态IP的目的是为了下一步设置ssh.
+
+*  ``/etc/network/interfaces`` 中的 eth0 项::
  
     auto eth0
     iface eth0 inet static
@@ -117,9 +119,11 @@ static ip addr
         netmask   255.255.255.0
         gateway   192.168.122.1
 
-运行 `sudo service networking restart` 重启网络服务(对于Ubuntu系统)
+运行 ``sudo service networking restart`` 重启网络服务(对于Ubuntu系统)
 
-另外如果不成功, 也可以直接手动设置ip地址. (会在下次重启时失效). 例如::
+*  直接手动设置ip地址
+   
+会在下次重启时失效. 例如::
 
    2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000    
       link/ether 00:16:3e:76:db:ed brd ff:ff:ff:ff:ff:ff    
@@ -132,7 +136,7 @@ static ip addr
 
 来强制指定ipv4地址. 其中 'brd +' 是一个简写.
 
-------------------------------------------------------------
+*  dhcp服务器指定方式
 
 如果使用libvirt来管理, 那么还有更简单的方法, 在宿主机中为每个虚拟机的mac地址分
 配固定的ip. 这样即使虚拟机内部使用dhcp方式, 还是能保证每次获取的ip是固定的. 有
@@ -152,7 +156,8 @@ default`` 查看修改结果.
 ssh configure
 --------------
 
-有一些实验需要使用ssh来给虚拟机发送指令. 一般虚拟机安装服务器版本的操作系统上会自动打开sshd. 另外加上上一步配置的静态IP, 就能够实现ssh.
+有一些实验需要使用ssh来给虚拟机发送指令. 一般虚拟机安装服务器版本的操作系统上会
+自动打开sshd. 另外加上上一步配置的静态IP, 就能够实现ssh.
 
 1.  可以给ssh加上别名, 方便连接. 修改dom0的 ``~/.ssh/configure`` ::
 
