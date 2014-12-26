@@ -1,20 +1,24 @@
 xen-configuration
 ===================
 
-**author**: xiehuc<xiehuc@gmail.com>
+:Author: xiehuc<xiehuc@gmail.com>
 
 installnation
 -------------
 
-以ubuntu为例子, 首先安装Xen ::
+以ubuntu为例子, 首先安装Xen :
 
-	# apt-get install xen-hypervisory-amd-4.1 libxen-dev
+.. code:: bash
 
-然后使用命令来安装半虚拟化的ubuntu::
+   #: apt-get install xen-hypervisory-amd-4.1 libxen-dev
 
-   # virt-install -n ubuntu_0 --connect xen:/// -r 1024  -f /dev/svg/ubuntu_0 -w bridge=virbr0 \
-     -l http://run.hit.edu.cn/ubuntu/dists/trusty/main/installer-amd64/ \
-     --console pty,target_type=virtio
+然后使用命令来安装半虚拟化的ubuntu:
+
+.. code:: bash
+
+  #: virt-install -n ubuntu_0 --connect xen:/// -r 1024  -f /dev/svg/ubuntu_0 \
+   -w bridge=virbr0 -l http://run.hit.edu.cn/ubuntu/dists/trusty/main/installer-amd64/ \
+   --console pty,target_type=virtio
 
 如果出现 ``error: internal error: cannot find character device <null>`` . 则再
 次运行 ``sudo xl console ubuntu_0`` 继续安装.
@@ -25,14 +29,21 @@ installnation
 Xen 早的时候使用 xm 的工具链. 现在使用 xl 的工具链. 幸好用法都差不多. 但是推荐
 使用 libvirt 的工具链. 能很好的统一两者, 还能兼容KVM等等的虚拟机. 首先需要将
 ``LIBVIRTD_DEFAULT_URI="xen:///"`` 加入到环境变量中. 当前用户和root用户都要加,
-因为有些时候需要跳到sudo权限去做. 或者可以在使用命令的时候加入
---connect=xen:/// 来强制指定连接Xen的服务.
+因为有些时候需要跳到sudo权限去做. 修改 ~/.bashrc, 最后一行加入:
+
+.. code:: bash
+
+   export LIBVIRTD_DEFAULT_URI="xen:///"
+
+并且退出服务器再重新登录, 来使设置生效. 
 
 使用 ``virsh list --all`` 来查看所有虚拟机(包括关闭状态).
 
-当安装完一台虚拟机之后, 可以使用克隆命令快速复制::
+当安装完一台虚拟机之后, 可以使用克隆命令快速复制:
 
-    #virt-clone -o origin -n target -f file
+.. code:: bash
+
+    # virt-clone -o origin -n target -f file
 
 configuration
 -------------
@@ -44,7 +55,9 @@ configuration
     将/etc/grub.d/20_linux_xen改为06_linux_xen 保证在10_linux之前就可以了。
     再用`sudo update-grub`重新生成一下。
 
-2. 将当前用户添加到libvirtd组::
+2. 将当前用户添加到libvirtd组:
+
+.. code:: bash
 
     sudo usermod -aG libvirtd xiehuc
 
@@ -53,32 +66,30 @@ configuration
     (xen-http-server yes)
     (xen-port 8000)
 
-4. 重启xend服务(可选)::
+4. 重启xend服务(可选):
+
+.. code:: bash
 
     sudo service xend restart
 
 此时就可以使用virt-manager连接远程xen了。
 
-virt-manager
-------------
-
-安装时需要指定内存不得小与1024MB.因为不然无法开启图形安装程序。
-进而在指定储存分配的时候，使用控制台的很困难。
-
 guest-configure
 ---------------
 
 xenstore 无论是hvm还是pvm均可以使用。
-在客户机中使用 xenstore 命令失败的时候。如果是提示 No Such File Or Diretory.
+在客户机中使用 xenstore 命令失败的时候。如果是提示 ``No Such File Or Diretory`` .
 
-1. 查看/proc/xen/xenbus 或者 /dev/xen/xenbus
-2. 修改/etc/environment 添加 XENSTORED_PATH=<上面的值>
-3. 重启电脑
+1. 查看是否存在 ``/proc/xen/xenbus`` 或者 ``/dev/xen/xenbus`` 文件.
+2. 修改 ``/etc/environment`` 添加 ``XENSTORED_PATH=<上面的路径>``
+3. 重启虚拟机或domain-0
 
 console-configure
 ------------------
 
-如果是用的全虚拟化方式安装的, 没有console的话可以尝试以下操作. 编辑`/etc/default/grub`文件::
+*  对于全虚拟化方式安装
+  
+没有console的话可以尝试以下操作. 编辑 ``/etc/default/grub`` 文件::
 
     GRUB_CMDLINE_LINUX_DEFAULT="console=ttyS0,115200"
     GRUB_TERMINAL=serial
@@ -99,18 +110,17 @@ console-configure
 
 需要退出的时候,使用 `Ctrl+]` 即可
 
-------------------------------------------------------------------------------------
+*  对于半虚拟化方式安装
 
-如果是用的半虚拟化方式安装, 那么大部分情况下都能够顺利的启用console而无需额外的配置.
-但是如果是希望使用 ``virsh console`` 工具链来连接console, 则需要使用 ``virsh
-edit <domain>``, 修改console项目如下::
+大部分情况下都能够顺利的启用console而无需额外的配置.但是如果是希望使用 ``virsh
+console`` 工具链来连接console, 则需要使用 ``virsh edit <domain>``, 修改console
+项目如下::
 
    <console type='pty'>
       <target type='virtio' port='0'/>
     </console>
 
 这个是使用新的virtio虚拟输出, 成功率高.
-
 
 phoronix-test-suite configure
 ------------------------------
