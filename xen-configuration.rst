@@ -28,12 +28,12 @@ installnation
 
 Xen 早的时候使用 xm 的工具链. 现在使用 xl 的工具链. 幸好用法都差不多. 但是推荐
 使用 libvirt 的工具链. 能很好的统一两者, 还能兼容KVM等等的虚拟机. 首先需要将
-``LIBVIRTD_DEFAULT_URI="xen:///"`` 加入到环境变量中. 当前用户和root用户都要加,
+``LIBVIRT_DEFAULT_URI="xen:///"`` 加入到环境变量中. 当前用户和root用户都要加,
 因为有些时候需要跳到sudo权限去做. 修改 ~/.bashrc, 最后一行加入:
 
 .. code:: bash
 
-   export LIBVIRTD_DEFAULT_URI="xen:///"
+   export LIBVIRT_DEFAULT_URI="xen:///"
 
 并且退出服务器再重新登录, 来使设置生效. 
 
